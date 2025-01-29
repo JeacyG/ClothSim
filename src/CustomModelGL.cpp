@@ -63,36 +63,129 @@ void CustomModelGL::createDeformableGrid()
 		m_Model->listVertex[i].y /= (size.w - size.z);
 	}
 
+    m_Model->nb_vertex = (int)m_Model->listVertex.size();
+    m_Model->nb_faces = (int)m_Model->listFaces.size();
+    m_Model->loader->computeNormalAndTangents(m_Model);
 
+    /**************A COMPLETER *********************************************************
+    * Ajouter ici des ressorts entre les �l�ments de la grille 2D composant notre objet d�formable. Chaque ressort est une structure spring a rentrer dans le tableau springs.
+    * struct Spring
+    {
+	    int id1;	// Indice du sommet 1
+	    int id2;	// Indice du sommet 2
+	    float length; // longueur au repos. D�finir la longueur initiale entre les 2 sommets par exemple
+	    float KsFactor; // facteur de rigidit�. // modulation du facteur de rigidit� global. Ce facteur va "moduler" le facteur de rigidit� globale pass� en param�tre. Utiliser 1.0 par exemple pour un ressort standard, 0.75 ou 0.5, ou moins pour un ressort plus fainle.
+    };
 
-	 m_Model->nb_vertex = (int)m_Model->listVertex.size();
-	 m_Model->nb_faces = (int)m_Model->listFaces.size();
-	 m_Model->loader->computeNormalAndTangents(m_Model);
+    Il est conseill� de d�finir au moins un ressort standard entre chaque paire d'�l�ments de la grille en voisinage direct (haut,bas, gauche ,droite).
+    Il peut �tre �galement utile de d�finir des ressorts entre les �l�ments diagnouax , voir de voisinage plus eloign� (sommets a 2 el�ments de distance). Exp�rimentez diff�rentes strat�gies et mod�les afin d'obtenir un r�sultat convaincant.
 
+    */
 
+	float springLength = 1.0f;
+	float KsFactor = 1.0f;
 
+    // Ressorts pour chaques voisins direct (manhattan)
 
-	 /**************A COMPLETER *********************************************************
-	 * Ajouter ici des ressorts entre les �l�ments de la grille 2D composant notre objet d�formable. Chaque ressort est une structure spring a rentrer dans le tableau springs.
-	 * struct Spring
+    for (int row = 0; row < m_nbElements; row++)
+    {
+        for (int column = 0; column < m_nbElements; column++)
+        {
+            if (row > 0)
+            {
+	            int north = (row - 1) * m_nbElements + column;
+            	addSpring(indice(row, column), north, springLength, KsFactor);
+            }
+        	if (row < m_nbElements - 1)
+        	{
+        		int south = (row + 1) * m_nbElements + column;
+        		addSpring(indice(row, column), south, springLength, KsFactor);
+        	}
+        	if (column > 0)
+        	{
+        		int west = row * m_nbElements + (column - 1);
+        		addSpring(indice(row, column), west, springLength, KsFactor);
+        	}
+        	if (column < m_nbElements - 1)
+        	{
+        		int east = row * m_nbElements + (column + 1);
+        		addSpring(indice(row, column), east, springLength, KsFactor);
+        	}
+        }
+    }
+
+	// Ressorts pour chaques voisins 2 straight steps away
+
+	for (int row = 0; row < m_nbElements; row++)
+	{
+		for (int column = 0; column < m_nbElements; column++)
 		{
-			int id1;	// Indice du sommet 1
-			int id2;	// Indice du sommet 2
-			float length; // longueur au repos. D�finir la longueur initiale entre les 2 sommets par exemple
-			float KsFactor; // facteur de rigidit�. // modulation du facteur de rigidit� global. Ce facteur va "moduler" le facteur de rigidit� globale pass� en param�tre. Utiliser 1.0 par exemple pour un ressort standard, 0.75 ou 0.5, ou moins pour un ressort plus fainle.
-		};
+			if (row >= 2)
+			{
+				int north = (row - 2) * m_nbElements + column;
+				addSpring(indice(row, column), north, springLength / 2.0f, KsFactor);
+			}
+			if (row < m_nbElements - 2)
+			{
+				int south = (row + 2) * m_nbElements + column;
+				addSpring(indice(row, column), south, springLength / 2.0f, KsFactor);
+			}
+			if (column >= 2)
+			{
+				int west = row * m_nbElements + (column - 2);
+				addSpring(indice(row, column), west, springLength / 2.0f, KsFactor);
+			}
+			if (column < m_nbElements - 2)
+			{
+				int east = row * m_nbElements + (column + 2);
+				addSpring(indice(row, column), east, springLength / 2.0f, KsFactor);
+			}
+		}
+	}
 
-		Il est conseill� de d�finir au moins un ressort standard entre chaque paire d'�l�ments de la grille en voisinage direct (haut,bas, gauche ,droite). 
-		Il peut �tre �galement utile de d�finir des ressorts entre les �l�ments diagnouax , voir de voisinage plus eloign� (sommets a 2 el�ments de distance). Exp�rimentez diff�rentes strat�gies et mod�les afin d'obtenir un r�sultat convaincant.
+	// Ressorts pour chaques voisins diagonaux
 
-	 */
+	for (int row = 0; row < m_nbElements; row++)
+	{
+		for (int column = 0; column < m_nbElements; column++)
+		{
+			if (row > 0 && column < m_nbElements - 1)
+			{
+				int northEast = (row - 1) * m_nbElements + (column + 1);
+				addSpring(indice(row, column), northEast, springLength, KsFactor);
+			}
+			if (row > 0 && column > 0)
+			{
+				int northWest = (row - 1) * m_nbElements + (column - 1);
+				addSpring(indice(row, column), northWest, springLength, KsFactor);
+			}
+			if (row < m_nbElements - 1 && column < m_nbElements - 1)
+			{
+				int southEast = (row + 1) * m_nbElements + (column + 1);
+				addSpring(indice(row, column), southEast, springLength, KsFactor);
+			}
+			if (row < m_nbElements - 1 && column > 0)
+			{
+				int southWest = (row + 1) * m_nbElements + (column - 1);
+				addSpring(indice(row, column), southWest, springLength, KsFactor);
+			}
+		}
+	}
 
+    /********************************************************************************************************************************************/
 
-	 /********************************************************************************************************************************************/
+    loadToGPU();
+}
 
+void CustomModelGL::addSpring(int id1, int id2, float length, float KsFactor)
+{
+	Spring s = Spring();
+	s.id1 = id1;
+	s.id2 = id2;
+	s.length = length;
+	s.KsFactor = KsFactor;
 
-
-	 loadToGPU();
+	springs.push_back(s);
 }
 
 int CustomModelGL::indice(int i, int j)

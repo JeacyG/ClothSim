@@ -155,7 +155,13 @@ void MassSpringMaterial::updateSimulation(CustomModelGL* m)
 
 void MassSpringMaterial::computeSpringForce(CustomModelGL* m, Spring s)
 {
-	/**A compl�ter**/
+	float stable_length = s.length;
+	float k = s.KsFactor;
+	glm::vec3 p1 = m->getGeometricModel()->listVertex[s.id1];
+	glm::vec3 p2 = m->getGeometricModel()->listVertex[s.id2];
+	float current_length = (p1 - p2).length();
+
+	// glm::vec3 force = k * (current_length - stable_length) * (p2 - p1) / (p2 - p1);
 }
 
 

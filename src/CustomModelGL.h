@@ -21,6 +21,9 @@ public:
 	CustomModelGL(std::string name, int _nbElements);
 
 	void createDeformableGrid();
+
+	void addSpring(int id1, int id2, float length, float KsFactor);
+
 	int m_nbElements;
 	std::vector<glm::dvec3> V;
 	std::vector<glm::dvec3> F;
