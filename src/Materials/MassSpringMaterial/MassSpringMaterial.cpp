@@ -118,11 +118,22 @@ void MassSpringMaterial::computeMassSpringAnimation(CustomModelGL* m)
 	* 
 	*********************/
 
+	for (int i = 0; i < m->m_nbElements; i++)
+	{
+		for (int j = 0; j < m->m_nbElements; j++)
+		{
+			glm::dvec3 f_gravite = physik.mass * -9.8 * normalize(up_direction);
+			glm::dvec3 f_damping = (double)(-physik.kd_dampening * physik.mass) * m->V[m->indice(i, j)];
+			glm::dvec3 f_wind = (double)physik.mass * (m->V[m->indice(i, j)] - (double)physik.wind * normalize(wind_direction));
+			glm::dvec3 normal = glm::dvec3(m->getGeometricModel()->listNormals[m->indice(i, j)]);
+			glm::dvec3 f_friction = -physik.windFriction * glm::dot(normal, ((double)physik.wind * normalize(wind_direction)) - m->V[m->indice(i, j)]) * normal;
+
+			m->F[m->indice(i, j)] = f_gravite + f_damping + f_wind + f_friction;
+		}
+	}
 
 	/*Ajouter les forces des ressorts*/
 	computeAllSpringForces(m);
-
-			
 
 	/********************
 	**** On ajoute ici des contraintes externes pour laisser le drapeau accroch� au poteau. Dans cet exemple, on annule les forces appliqu�es a ces points . Il serait �galement int�ressant de changer au d�marrage la longueur ou la rigidit� des ressorts voisins a ces points.
@@ -139,29 +150,38 @@ void MassSpringMaterial::computeMassSpringAnimation(CustomModelGL* m)
 
 void MassSpringMaterial::computeAllSpringForces(CustomModelGL* m)
 {
-
 	for (Spring s : m->springs)
 	{
 		computeSpringForce(m,s);
 	}
-
 }
 
 void MassSpringMaterial::updateSimulation(CustomModelGL* m)
 {
-	/*A compl�ter*/
-	
+	for (int i = 0; i < m->m_nbElements; i++)
+	{
+		for (int j = 0; j < m->m_nbElements; j++)
+		{
+			m->V[m->indice(i, j)] += (double)(physik.deltaTime / physik.mass) * m->F[m->indice(i, j)];
+			m->getGeometricModel()->listVertex[m->indice(i, j)] += (double)physik.deltaTime * m->V[m->indice(i, j)];
+		}
+	}
 }
 
 void MassSpringMaterial::computeSpringForce(CustomModelGL* m, Spring s)
 {
 	float stable_length = s.length;
-	float k = s.KsFactor;
+	float k = s.KsFactor * physik.ks_Stiffness;
 	glm::vec3 p1 = m->getGeometricModel()->listVertex[s.id1];
 	glm::vec3 p2 = m->getGeometricModel()->listVertex[s.id2];
-	float current_length = (p1 - p2).length();
+	float current_length = glm::length(p2 - p1);
 
-	// glm::vec3 force = k * (current_length - stable_length) * (p2 - p1) / (p2 - p1);
+	if (current_length < 1e-6f) return;
+
+	glm::vec3 force = k * (current_length - stable_length) * ((p2 - p1) / current_length);
+
+	m->F[s.id1] += force;
+	m->F[s.id2] -= force;
 }
 
 
