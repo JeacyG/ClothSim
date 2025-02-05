@@ -22,7 +22,7 @@ public:
 
 	void createDeformableGrid();
 
-	void addSpring(int id1, int id2, float length, float KsFactor);
+	void AddSpring(int id1, int id2, float length, float KsFactor);
 
 	int m_nbElements;
 	std::vector<glm::dvec3> V;

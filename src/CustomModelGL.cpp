@@ -95,22 +95,22 @@ void CustomModelGL::createDeformableGrid()
             if (row > 0)
             {
 	            int north = (row - 1) * m_nbElements + column;
-            	addSpring(indice(row, column), north, springLength, KsFactor);
+            	AddSpring(indice(row, column), north, springLength, KsFactor);
             }
         	if (row < m_nbElements - 1)
         	{
         		int south = (row + 1) * m_nbElements + column;
-        		addSpring(indice(row, column), south, springLength, KsFactor);
+        		AddSpring(indice(row, column), south, springLength, KsFactor);
         	}
         	if (column > 0)
         	{
         		int west = row * m_nbElements + (column - 1);
-        		addSpring(indice(row, column), west, springLength, KsFactor);
+        		AddSpring(indice(row, column), west, springLength, KsFactor);
         	}
         	if (column < m_nbElements - 1)
         	{
         		int east = row * m_nbElements + (column + 1);
-        		addSpring(indice(row, column), east, springLength, KsFactor);
+        		AddSpring(indice(row, column), east, springLength, KsFactor);
         	}
         }
     }
@@ -124,22 +124,22 @@ void CustomModelGL::createDeformableGrid()
 			if (row >= 2)
 			{
 				int north = (row - 2) * m_nbElements + column;
-				addSpring(indice(row, column), north, springLength * 2.0f, KsFactor / 2.0f);
+				AddSpring(indice(row, column), north, springLength * 2.0f, KsFactor / 2.0f);
 			}
 			if (row < m_nbElements - 2)
 			{
 				int south = (row + 2) * m_nbElements + column;
-                addSpring(indice(row, column), south, springLength * 2.0f, KsFactor / 2.0f);
+                AddSpring(indice(row, column), south, springLength * 2.0f, KsFactor / 2.0f);
 			}
 			if (column >= 2)
 			{
 				int west = row * m_nbElements + (column - 2);
-                addSpring(indice(row, column), west, springLength * 2.0f, KsFactor / 2.0f);
+                AddSpring(indice(row, column), west, springLength * 2.0f, KsFactor / 2.0f);
 			}
 			if (column < m_nbElements - 2)
 			{
 				int east = row * m_nbElements + (column + 2);
-                addSpring(indice(row, column), east, springLength * 2.0f, KsFactor / 2.0f);
+                AddSpring(indice(row, column), east, springLength * 2.0f, KsFactor / 2.0f);
 			}
 		}
 	}
@@ -153,22 +153,22 @@ void CustomModelGL::createDeformableGrid()
 			if (row > 0 && column < m_nbElements - 1)
 			{
 				int northEast = (row - 1) * m_nbElements + (column + 1);
-				addSpring(indice(row, column), northEast, springDiagLength, KsFactor);
+				AddSpring(indice(row, column), northEast, springDiagLength, KsFactor);
 			}
 			if (row > 0 && column > 0)
 			{
 				int northWest = (row - 1) * m_nbElements + (column - 1);
-				addSpring(indice(row, column), northWest, springDiagLength, KsFactor);
+				AddSpring(indice(row, column), northWest, springDiagLength, KsFactor);
 			}
 			if (row < m_nbElements - 1 && column < m_nbElements - 1)
 			{
 				int southEast = (row + 1) * m_nbElements + (column + 1);
-				addSpring(indice(row, column), southEast, springDiagLength, KsFactor);
+				AddSpring(indice(row, column), southEast, springDiagLength, KsFactor);
 			}
 			if (row < m_nbElements - 1 && column > 0)
 			{
 				int southWest = (row + 1) * m_nbElements + (column - 1);
-				addSpring(indice(row, column), southWest, springDiagLength, KsFactor);
+				AddSpring(indice(row, column), southWest, springDiagLength, KsFactor);
 			}
 		}
 	}
@@ -178,7 +178,7 @@ void CustomModelGL::createDeformableGrid()
     loadToGPU();
 }
 
-void CustomModelGL::addSpring(int id1, int id2, float length, float KsFactor)
+void CustomModelGL::AddSpring(int id1, int id2, float length, float KsFactor)
 {
 	Spring s = Spring();
 	s.id1 = id1;

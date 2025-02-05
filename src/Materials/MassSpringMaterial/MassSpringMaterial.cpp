@@ -122,16 +122,21 @@ void MassSpringMaterial::computeMassSpringAnimation(CustomModelGL* m)
 	{
 		for (int j = 0; j < m->m_nbElements; j++)
 		{
+			// Force gravité
 			glm::dvec3 f_gravite = physik.mass * -9.8 * normalize(up_direction);
 
+			// Force ammortissage
 			glm::dvec3 f_damping = (double)(-physik.kd_dampening) * m->V[m->indice(i, j)];
 
+			// Force vent
             glm::dvec3 f_wind = (double)physik.wind * normalize(wind_direction);
 
+			// Force friction
 			glm::dvec3 normal = glm::dvec3(m->getGeometricModel()->listNormals[m->indice(i, j)]);
 			glm::dvec3 relative_velocity = ((double)physik.wind * normalize(wind_direction)) - m->V[m->indice(i, j)];
             glm::dvec3 f_friction = -physik.windFriction * glm::dot(normal, relative_velocity) * normal;
 
+			// Somme des forces
 			m->F[m->indice(i, j)] = f_gravite + f_damping + f_wind + f_friction;
 		}
 	}
@@ -180,8 +185,10 @@ void MassSpringMaterial::computeSpringForce(CustomModelGL* m, Spring s)
 	glm::vec3 p2 = m->getGeometricModel()->listVertex[s.id2];
 	float current_length = glm::length(p2 - p1);
 
+	// Si longueur trop petite, skipper pour éviter division par ~0
 	if (current_length < 1e-6f) return;
 
+	// Force ressort
 	glm::vec3 force = k * (current_length - stable_length) * ((p2 - p1) / current_length);
 
 	m->F[s.id1] += force;
@@ -209,7 +216,7 @@ void MassSpringMaterial::displayInterface()
 			ImGui::SliderFloat("Particule Mass", &physik.mass, 0.05f, 10.0f, "Mass = %.3f");
 			ImGui::SliderFloat("DeltaTime", &physik.deltaTime, 0.0f, 0.001f, "DeltaTime = %.4f");
 			ImGui::SliderFloat("Stiffness : ks", &physik.ks_Stiffness, 0.0f, 20000.0f, "Stiffness = %.2f");
-			ImGui::SliderFloat("Dampening", &physik.kd_dampening, 0.0f, 20.0f, "Dampening = %.2f");
+			ImGui::SliderFloat("Dampening", &physik.kd_dampening, 0.0f, 4.0f, "Dampening = %.2f");
 			ImGui::SliderFloat("Wind power", &physik.wind, 0.0f, 50.0f, "Wind = %.2f");
 			ImGui::SliderFloat("Wind Friction", &physik.windFriction, 0.0f, 2.0f, "Wind Friction = %.2f");
 
