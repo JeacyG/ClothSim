@@ -36,10 +36,10 @@ MassSpringMaterial::MassSpringMaterial(std::string name,Texture2D *t) :
 
 
 	physik.mass = 0.05f;
-	physik.deltaTime = 0.0f;
-	physik.kd_dampening = 15.0f;
-	physik.ks_Stiffness = 5500.0f;
-	physik.wind = 0.0f;
+	physik.deltaTime = 1e-4f;
+	physik.kd_dampening = 0.9f;
+	physik.ks_Stiffness = 7000.0f;
+	physik.wind = 16.0f;
 	physik.windFriction = 0.5f;
 
 
@@ -98,7 +98,7 @@ void MassSpringMaterial::animate(Node* o, const float elapsedTime)
 	up_direction = Scene::getInstance()->getSceneNode()->frame()->convertDirTo(glm::vec3(0.0, 1.0, 0.0), o->frame());
 
 	/*Direction du vecteur Wind dans le rep�re de l'objet. A utiliser pour d�finir la direction de la force du vent*/
-	wind_direction = Scene::getInstance()->getSceneNode()->frame()->convertDirTo(glm::vec3(0.0, 0.0, -1.0), o->frame());
+	wind_direction = Scene::getInstance()->getSceneNode()->frame()->convertDirTo(glm::vec3(1.0, 0.0, 0.0), o->frame());
 	
 
 	/*Appels GPU pour mettre a jour le tableau des normales et des positions sur le GPU*/
@@ -123,10 +123,14 @@ void MassSpringMaterial::computeMassSpringAnimation(CustomModelGL* m)
 		for (int j = 0; j < m->m_nbElements; j++)
 		{
 			glm::dvec3 f_gravite = physik.mass * -9.8 * normalize(up_direction);
-			glm::dvec3 f_damping = (double)(-physik.kd_dampening * physik.mass) * m->V[m->indice(i, j)];
-			glm::dvec3 f_wind = (double)physik.mass * (m->V[m->indice(i, j)] - (double)physik.wind * normalize(wind_direction));
+
+			glm::dvec3 f_damping = (double)(-physik.kd_dampening) * m->V[m->indice(i, j)];
+
+            glm::dvec3 f_wind = (double)physik.wind * normalize(wind_direction);
+
 			glm::dvec3 normal = glm::dvec3(m->getGeometricModel()->listNormals[m->indice(i, j)]);
-			glm::dvec3 f_friction = -physik.windFriction * glm::dot(normal, ((double)physik.wind * normalize(wind_direction)) - m->V[m->indice(i, j)]) * normal;
+			glm::dvec3 relative_velocity = ((double)physik.wind * normalize(wind_direction)) - m->V[m->indice(i, j)];
+            glm::dvec3 f_friction = -physik.windFriction * glm::dot(normal, relative_velocity) * normal;
 
 			m->F[m->indice(i, j)] = f_gravite + f_damping + f_wind + f_friction;
 		}

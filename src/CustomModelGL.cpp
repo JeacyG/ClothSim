@@ -82,7 +82,8 @@ void CustomModelGL::createDeformableGrid()
 
     */
 
-	float springLength = 1.0f;
+	float springLength = glm::length(m_Model->listVertex[0] - m_Model->listVertex[1]);
+    float springDiagLength = glm::sqrt(springLength * springLength + springLength * springLength);
 	float KsFactor = 1.0f;
 
     // Ressorts pour chaques voisins direct (manhattan)
@@ -123,22 +124,22 @@ void CustomModelGL::createDeformableGrid()
 			if (row >= 2)
 			{
 				int north = (row - 2) * m_nbElements + column;
-				addSpring(indice(row, column), north, springLength / 2.0f, KsFactor);
+				addSpring(indice(row, column), north, springLength * 2.0f, KsFactor / 2.0f);
 			}
 			if (row < m_nbElements - 2)
 			{
 				int south = (row + 2) * m_nbElements + column;
-				addSpring(indice(row, column), south, springLength / 2.0f, KsFactor);
+                addSpring(indice(row, column), south, springLength * 2.0f, KsFactor / 2.0f);
 			}
 			if (column >= 2)
 			{
 				int west = row * m_nbElements + (column - 2);
-				addSpring(indice(row, column), west, springLength / 2.0f, KsFactor);
+                addSpring(indice(row, column), west, springLength * 2.0f, KsFactor / 2.0f);
 			}
 			if (column < m_nbElements - 2)
 			{
 				int east = row * m_nbElements + (column + 2);
-				addSpring(indice(row, column), east, springLength / 2.0f, KsFactor);
+                addSpring(indice(row, column), east, springLength * 2.0f, KsFactor / 2.0f);
 			}
 		}
 	}
@@ -152,22 +153,22 @@ void CustomModelGL::createDeformableGrid()
 			if (row > 0 && column < m_nbElements - 1)
 			{
 				int northEast = (row - 1) * m_nbElements + (column + 1);
-				addSpring(indice(row, column), northEast, springLength, KsFactor);
+				addSpring(indice(row, column), northEast, springDiagLength, KsFactor);
 			}
 			if (row > 0 && column > 0)
 			{
 				int northWest = (row - 1) * m_nbElements + (column - 1);
-				addSpring(indice(row, column), northWest, springLength, KsFactor);
+				addSpring(indice(row, column), northWest, springDiagLength, KsFactor);
 			}
 			if (row < m_nbElements - 1 && column < m_nbElements - 1)
 			{
 				int southEast = (row + 1) * m_nbElements + (column + 1);
-				addSpring(indice(row, column), southEast, springLength, KsFactor);
+				addSpring(indice(row, column), southEast, springDiagLength, KsFactor);
 			}
 			if (row < m_nbElements - 1 && column > 0)
 			{
 				int southWest = (row + 1) * m_nbElements + (column - 1);
-				addSpring(indice(row, column), southWest, springLength, KsFactor);
+				addSpring(indice(row, column), southWest, springDiagLength, KsFactor);
 			}
 		}
 	}
